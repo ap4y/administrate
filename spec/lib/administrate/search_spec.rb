@@ -22,6 +22,11 @@ class MockDashboardWithAssociation
       searchable: true,
       searchable_field: "name",
     ),
+    author: Administrate::Field::BelongsTo.with_options(
+      class_name: "Person",
+      searchable: true,
+      searchable_field: "name",
+    ),
     address: Administrate::Field::HasOne.with_options(
       searchable: true,
       searchable_field: "street",
@@ -31,6 +36,14 @@ end
 
 describe Administrate::Search do
   describe "#run" do
+    before do
+      class Role < ActiveRecord::Base; end
+      class Person < ActiveRecord::Base; end
+      class Address < ActiveRecord::Base; end
+    end
+
+    after { remove_constants :Role, :Address }
+
     it "returns all records when no search term" do
       begin
         class User < ActiveRecord::Base; end
@@ -125,7 +138,9 @@ describe Administrate::Search do
       let(:expected_query) do
         [
           'LOWER(CAST("roles"."name" AS CHAR(256))) LIKE ?'\
+          ' OR LOWER(CAST("people"."name" AS CHAR(256))) LIKE ?'\
           ' OR LOWER(CAST("addresses"."street" AS CHAR(256))) LIKE ?',
+          "%тест test%",
           "%тест test%",
           "%тест test%",
         ]
@@ -134,14 +149,14 @@ describe Administrate::Search do
       it "joins with the correct association table to query" do
         allow(scoped_object).to receive(:where)
 
-        expect(scoped_object).to receive(:joins).with(%i(role address)).
+        expect(scoped_object).to receive(:joins).with(%i(role author address)).
           and_return(scoped_object)
 
         search.run
       end
 
       it "builds the 'where' clause using the joined tables" do
-        allow(scoped_object).to receive(:joins).with(%i(role address)).
+        allow(scoped_object).to receive(:joins).with(%i(role author address)).
           and_return(scoped_object)
 
         expect(scoped_object).to receive(:where).with(*expected_query)
