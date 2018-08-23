@@ -90,7 +90,7 @@ Defaults to `:#{attribute}.to_s.singularize.camelcase`.
 `:searchable` - Specify if the attribute should be considered when searching.
 Default is `false`.
 
-`searchable_field` - Specify which column to use on the search, only applies
+`searchable_fields` - Specify which columns to use on the search, only applies
 if `searchable` is `true`
 
 For example:
@@ -98,7 +98,7 @@ For example:
 ```ruby
   country: Field::BelongsTo.with_options(
     searchable: true,
-    seachable_field: 'name',
+    searchable_fields: ['name'],
   )
 ```
 
@@ -129,7 +129,7 @@ Defaults to `:#{attribute}.to_s.singularize.camelcase`.
 `:searchable` - Specify if the attribute should be considered when searching.
 Default is `false`.
 
-`searchable_field` - Specify which column to use on the search, only applies if
+`searchable_fields` - Specify which columns to use on the search, only applies if
 `searchable` is `true`
 
 For example:
@@ -137,7 +137,7 @@ For example:
 ```ruby
   cities: Field::HasMany.with_options(
     searchable: true,
-    searchable_field: 'name',
+    searchable_fields: ['name'],
   )
 ```
 

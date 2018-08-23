@@ -20,16 +20,16 @@ class MockDashboardWithAssociation
   ATTRIBUTE_TYPES = {
     role: Administrate::Field::BelongsTo.with_options(
       searchable: true,
-      searchable_field: "name",
+      searchable_fields: ["name"],
     ),
     author: Administrate::Field::BelongsTo.with_options(
       class_name: "Person",
       searchable: true,
-      searchable_field: "name",
+      searchable_fields: ["first_name", "last_name"],
     ),
     address: Administrate::Field::HasOne.with_options(
       searchable: true,
-      searchable_field: "street",
+      searchable_fields: ["street"],
     ),
   }.freeze
 end
@@ -138,8 +138,10 @@ describe Administrate::Search do
       let(:expected_query) do
         [
           'LOWER(CAST("roles"."name" AS CHAR(256))) LIKE ?'\
-          ' OR LOWER(CAST("people"."name" AS CHAR(256))) LIKE ?'\
+          ' OR LOWER(CAST("people"."first_name" AS CHAR(256))) LIKE ?'\
+          ' OR LOWER(CAST("people"."last_name" AS CHAR(256))) LIKE ?'\
           ' OR LOWER(CAST("addresses"."street" AS CHAR(256))) LIKE ?',
+          "%тест test%",
           "%тест test%",
           "%тест test%",
           "%тест test%",

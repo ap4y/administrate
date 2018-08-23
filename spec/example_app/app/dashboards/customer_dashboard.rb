@@ -15,7 +15,7 @@ class CustomerDashboard < Administrate::BaseDashboard
       primary_key: :code,
       foreign_key: :country_code,
       searchable: true,
-      searchable_field: "name",
+      searchable_fields: ["name"],
     ),
     password: Field::Password,
   }

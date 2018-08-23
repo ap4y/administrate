@@ -22,14 +22,23 @@ module Administrate
     def query
       search_attributes.map do |attr|
         table_name = query_table_name(attr)
-        attr_name = column_to_query(attr)
-
-        "LOWER(CAST(#{table_name}.#{attr_name} AS CHAR(256))) LIKE ?"
+        searchable_fields(attr).map do |field|
+          attr_name = column_to_query(field)
+          "LOWER(CAST(#{table_name}.#{attr_name} AS CHAR(256))) LIKE ?"
+        end.join(" OR ")
       end.join(" OR ")
     end
 
+    def searchable_fields(attr)
+      return [attr] unless association_search?(attr)
+      attribute_types[attr].searchable_fields
+    end
+
     def search_terms
-      ["%#{term.mb_chars.downcase}%"] * search_attributes.count
+      fields_count = search_attributes.sum do |attr|
+        searchable_fields(attr).count
+      end
+      ["%#{term.mb_chars.downcase}%"] * fields_count
     end
 
     def search_attributes
@@ -55,12 +64,7 @@ module Administrate
     end
 
     def column_to_query(attr)
-      if association_search?(attr)
-        ActiveRecord::Base.connection.
-          quote_column_name(attribute_types[attr].searchable_field)
-      else
-        ActiveRecord::Base.connection.quote_column_name(attr)
-      end
+      ActiveRecord::Base.connection.quote_column_name(attr)
     end
 
     def tables_to_join

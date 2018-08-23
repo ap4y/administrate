@@ -25,8 +25,8 @@ module Administrate
         options.fetch(:searchable, deferred_class.searchable?)
       end
 
-      def searchable_field
-        options.fetch(:searchable_field)
+      def searchable_fields
+        options.fetch(:searchable_fields)
       end
 
       def permitted_attribute(attr, _options = nil)
