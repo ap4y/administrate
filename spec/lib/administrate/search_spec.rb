@@ -27,6 +27,12 @@ class MockDashboardWithAssociation
       searchable: true,
       searchable_fields: ["first_name", "last_name"],
     ),
+    another_author: Administrate::Field::BelongsTo.with_options(
+      class_name: "Person",
+      table_alias: "authors",
+      searchable: true,
+      searchable_fields: ["first_name"],
+    ),
     address: Administrate::Field::HasOne.with_options(
       searchable: true,
       searchable_fields: ["street"],
@@ -140,7 +146,9 @@ describe Administrate::Search do
           'LOWER(CAST("roles"."name" AS CHAR(256))) LIKE ?'\
           ' OR LOWER(CAST("people"."first_name" AS CHAR(256))) LIKE ?'\
           ' OR LOWER(CAST("people"."last_name" AS CHAR(256))) LIKE ?'\
+          ' OR LOWER(CAST("authors"."first_name" AS CHAR(256))) LIKE ?'\
           ' OR LOWER(CAST("addresses"."street" AS CHAR(256))) LIKE ?',
+          "%тест test%",
           "%тест test%",
           "%тест test%",
           "%тест test%",
@@ -151,14 +159,16 @@ describe Administrate::Search do
       it "joins with the correct association table to query" do
         allow(scoped_object).to receive(:where)
 
-        expect(scoped_object).to receive(:joins).with(%i(role author address)).
+        expect(scoped_object).to receive(:joins).
+          with(%i(role author another_author address)).
           and_return(scoped_object)
 
         search.run
       end
 
       it "builds the 'where' clause using the joined tables" do
-        allow(scoped_object).to receive(:joins).with(%i(role author address)).
+        allow(scoped_object).to receive(:joins).
+          with(%i(role author another_author address)).
           and_return(scoped_object)
 
         expect(scoped_object).to receive(:where).with(*expected_query)
